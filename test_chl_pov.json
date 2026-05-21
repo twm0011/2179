@@ -18,47 +18,63 @@
   "layer": [
     {
       "data": {"sphere": true},
-      "mark": {"type": "geoshape", "fill": "#a8d0e6", "stroke": "#6baed6", "strokeWidth": 0.5}
-    },
-    {
-      "data": {"graticule": {"step": [2, 2]}},
-      "mark": {"type": "geoshape", "filled": false, "stroke": "#c0d8e8", "strokeWidth": 0.3}
+      "mark": {"type": "geoshape", "fill": "#a8d0e6"}
     },
     {
       "data": {
-        "url": "https://raw.githubusercontent.com/twm0011/2179/refs/heads/main/malaysia-states-merged.topojson",
+        "url": "https://raw.githubusercontent.com/twm0011/2179/refs/heads/main/land-110m.json",
+        "format": {"type": "topojson", "feature": "land"}
+      },
+      "mark": {"type": "geoshape", "fill": "#C2C79B", "stroke": "#b0a080", "strokeWidth": 1.5}
+    },
+    {
+      "data": {
+        "url": "https://raw.githubusercontent.com/twm0011/2179/refs/heads/main/ne_10m_graticules_5.geojson",
+        "format": {"type": "json"}
+      },
+      "mark": {"type": "geoshape", "filled": false, "stroke": "#89b4c9", "strokeWidth": 1}
+    },
+    {
+      "data": {
+        "url": "https://raw.githubusercontent.com/twm0011/2179/refs/heads/main/my.topojson",
         "format": {"type": "topojson", "feature": "states"}
       },
       "transform": [
         {
-          "calculate": "datum.properties.Name === 'Penang' ? 'Pulau Pinang' : datum.properties.Name",
-          "as": "stateName"
+          "filter": "datum.properties.name !== 'Labuan' && datum.properties.name !== 'Kuala Lumpur' && datum.properties.name !== 'Putrajaya'"
         },
         {
-          "lookup": "stateName",
+          "lookup": "properties.name",
           "from": {
             "data": {
-              "url": "https://raw.githubusercontent.com/bonkers69420/2179/refs/heads/main/hh_poverty_state.csv",
+              "url": "https://raw.githubusercontent.com/twm0011/2179/refs/heads/main/poverty_2022.csv",
               "format": {"type": "csv"}
             },
             "key": "state",
-            "fields": ["poverty_absolute", "date"]
+            "fields": ["poverty_absolute"]
           }
         },
-        {"filter": "datum.date === '2022-01-01'"},
         {"calculate": "toNumber(datum.poverty_absolute)", "as": "poverty_rate"}
       ],
       "mark": {"type": "geoshape", "stroke": "white", "strokeWidth": 1},
       "encoding": {
-        "color": {
-          "field": "poverty_rate",
-          "type": "quantitative",
-          "title": "Poverty Rate (%)",
-          "scale": {"scheme": "orangered", "domain": [0, 20]},
-          "legend": {"titleFontSize": 12, "labelFontSize": 11, "format": ".1f"}
-        },
+                    "color": {
+            "field": "poverty_rate",
+            "type": "quantitative",
+            "title": "Poverty Rate (%)",
+            "scale": {
+                "type": "threshold",
+                "domain": [7.5, 13.2],
+                "range": ["#fdd49e", "#fc8d59", "#d7301f", "#7f0000"]
+            },
+            "legend": {
+                "titleFontSize": 12,
+                "labelFontSize": 11,
+                "format": ".1f"
+            }
+            },
         "tooltip": [
-          {"field": "stateName", "type": "nominal", "title": "State"},
+          {"field": "properties.name", "type": "nominal", "title": "State"},
           {"field": "poverty_rate", "type": "quantitative", "title": "Poverty Rate (%)", "format": ".1f"}
         ]
       }
